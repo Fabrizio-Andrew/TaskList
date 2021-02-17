@@ -11,24 +11,24 @@ namespace TaskList.DataTransferObjects
         /// Gets or sets the task identifier.
         /// </summary>
         /// <value>The identifier.</value>
-        public int Id { get; set; }
+        public int id { get; set; }
 
         /// <summary>
         /// Gets or sets the task name.
         /// </summary>
         /// <value>The task name.</value>
-        public string TaskName { get; set; }
+        public string taskName { get; set; }
 
         /// <summary>
         /// Gets or sets the completed status.
         /// </summary>
         /// <value>The completed status.</value>
-        public bool IsCompleted { get; set; }
+        public bool isCompleted { get; set; }
 
         /// <summary>
         /// Gets or sets the due date.
         /// </summary>
         /// <value>The due date.</value>
-        public DateTime DueDate { get; set; }
+        public DateTime dueDate { get; set; }
     }
 }
