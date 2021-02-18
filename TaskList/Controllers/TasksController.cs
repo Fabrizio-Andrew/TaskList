@@ -5,7 +5,9 @@ using TaskList.DataTransferObjects;
 using TaskList.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -48,10 +50,62 @@ namespace TaskList.Controllers
         }
 
         // POST api/<TasksController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
+
+        public async Task<IActionResult> CreateTask([FromBody] TaskCreate payload)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var newTask = new DataTransferObjects.Task()
+                    {
+                        taskName = payload.taskName,
+                        isCompleted = payload.isCompleted,
+                        dueDate = payload.dueDate
+                    };
+                }
+                else
+                {
+                    List<ErrorResponse> errorResponses = new List<ErrorResponse>();
+
+                    using StreamReader sr = new StreamReader(Request.Body);
+                    Request.Body.Seek(0, SeekOrigin.Begin);
+                    string inputJsonString = await sr.ReadToEndAsync();
+
+                    using (JsonDocument jsonDocument = JsonDocument.Parse(inputJsonString))
+                    {
+                        // This is an approach for determining which properties have errors and knowing the
+                        // property name as its the key value
+                        foreach (string key in ModelState.Keys)
+                        {
+                            if (ModelState[key].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
+                            {
+                                foreach (Microsoft.AspNetCore.Mvc.ModelBinding.ModelError error in ModelState[key].Errors)
+                                {
+                                    string cleansedKey = key.CleanseModelStateKey();
+                                    string camelCaseKey = cleansedKey.ToCamelCase();
+
+                                    System.Diagnostics.Trace.WriteLine($"MODEL ERROR: key:{cleansedKey} attemtedValue:{jsonDocument.RootElement.GetProperty(camelCaseKey)}, errorMessage:{error.ErrorMessage}");
+
+                                    ErrorResponse errorResponse = new ErrorResponse();
+                                    (errorResponse.errorDescription, errorResponse.errorNumber) = ErrorResponse.GetErrorMessage(error.ErrorMessage);
+                                    errorResponse.parameterName = camelCaseKey;
+                                    errorResponse.parameterValue = jsonDocument.RootElement.GetProperty(camelCaseKey).ToString();
+                                    errorResponses.Add(errorResponse);
+                                }
+                            }
+                        }
+                    }
+
+                    return BadRequest(errorResponses);
+                }
+            } 
+
+            return NoContent();
+        }
 
         // GET: api/<TasksController>
         [HttpGet]
