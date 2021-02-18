@@ -77,9 +77,8 @@ namespace TaskList
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseDeveloperExceptionPage();
 
-            SetupSwaggerJsonGeneratgionAndUI(app);
+            SetupSwaggerJsonGenerationAndUI(app);
 
             if (env.IsDevelopment())
             {
@@ -102,7 +101,7 @@ namespace TaskList
         /// Sets up the Swagger JSON file and Swagger Interactive UI
         /// </summary>
         /// <param name="app">The application builder</param>
-        private static void SetupSwaggerJsonGeneratgionAndUI(IApplicationBuilder app)
+        private static void SetupSwaggerJsonGenerationAndUI(IApplicationBuilder app)
         {
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c =>

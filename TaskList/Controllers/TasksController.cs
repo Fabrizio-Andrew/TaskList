@@ -57,18 +57,18 @@ namespace TaskList.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
         [Route("api/v1/tasks")]
-        public IActionResult Get()
+        public IActionResult GetAllTasks()
         {
             return new ObjectResult(_tasks.Keys.ToArray());
         }
 
         // GET api/<TasksController>/5
-        [HttpGet("{id}")]
+        [HttpGet]
         [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
         [Route("api/v1/tasks/{id}")]
-        public IActionResult Get(int id)
+        public IActionResult GetTasksById(int id)
         {
             try
             {
