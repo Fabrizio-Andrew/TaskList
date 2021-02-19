@@ -53,19 +53,18 @@ namespace TaskList.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
-
+        [Route("tasks")]
         public async Task<IActionResult> CreateTask([FromBody] TaskCreate payload)
         {
+            var newTask = new DataTransferObjects.Task();
+
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var newTask = new DataTransferObjects.Task()
-                    {
-                        taskName = payload.taskName,
-                        isCompleted = payload.isCompleted,
-                        dueDate = payload.dueDate
-                    };
+                    newTask.taskName = payload.taskName;
+                    newTask.isCompleted = payload.isCompleted;
+                    newTask.dueDate = payload.dueDate;
                 }
                 else
                 {
@@ -102,9 +101,19 @@ namespace TaskList.Controllers
 
                     return BadRequest(errorResponses);
                 }
-            } 
+            }
+            //catch (KeyNotFoundException knfEx)
+            //{
+            //    _logger.LogInformation(LoggingEvents.GetItem, knfEx, "TasksController Customer(id=[{id}]) was not found.", id);
+            //    return NotFound();
+            //}
+            catch (Exception ex)
+            {
+                _logger.LogError(LoggingEvents.InternalError, ex, "TasksController Customer(id=[{id}]) caused an internal error.");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
-            return NoContent();
+            return new ObjectResult(newTask);
         }
 
         // GET: api/<TasksController>
