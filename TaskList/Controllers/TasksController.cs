@@ -49,6 +49,15 @@ namespace TaskList.Controllers
             _tasks.Add(4, new DataTransferObjects.Task() { id = 4, taskName = "Mow Lawn", isCompleted = false, dueDate = DateTime.Parse("2021-06-11") });
         }
 
+        // GET: api/<TasksController>
+        [HttpGet]
+        [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
+        [Route("tasks")]
+        public IActionResult GetAllTasks()
+        {
+            return new ObjectResult(_tasks.Keys.ToArray());
+        }
+
         // POST api/<TasksController>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -192,23 +201,23 @@ namespace TaskList.Controllers
             return NoContent();
         }
 
-
-        // GET: api/<TasksController>
-        [HttpGet]
-        [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
-        [Route("api/v1/tasks")]
-        public IActionResult GetAllTasks()
+        [HttpDelete]
+        [ProducesResponseType(typeof(int), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
+        [Route("tasks/{id}")]
+        public IActionResult DeleteTask(int id)
         {
-            return new ObjectResult(_tasks.Keys.ToArray());
+            return NoContent();
         }
+
 
         // GET api/<TasksController>/5
         [HttpGet]
         [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
-        [Route("api/v1/tasks/{id}")]
-        public IActionResult GetTasksById(int id)
+        [Route("tasks/{id}")]
+        public IActionResult GetTaskById(int id)
         {
             try
             {
