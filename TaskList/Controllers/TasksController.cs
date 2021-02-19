@@ -116,6 +116,83 @@ namespace TaskList.Controllers
             return new ObjectResult(newTask);
         }
 
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
+        [Route("tasks/{id}")]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskUpdate payload)
+        {
+            try
+            {
+
+                if (ModelState.IsValid)
+                {
+                    _tasks[id] = new DataTransferObjects.Task()
+                    {
+                        id = id,
+                        taskName = payload.taskName,
+                        isCompleted = payload.isCompleted,
+                        dueDate = payload.dueDate,
+                    };
+                }
+                else
+                {
+                    List<ErrorResponse> errorResponses = new List<ErrorResponse>();
+
+
+                    // DEMO: Enable multi-stream read
+                    // The EnableMultipleStreamReadMiddleware is needed for reading from the
+                    // Request Body a second time, the first time the Request.Body is read
+                    // is in the middleware for deserializing the Customer Input
+
+                    // This allows us access to the raw input
+                    using StreamReader sr = new StreamReader(Request.Body);
+                    Request.Body.Seek(0, SeekOrigin.Begin);
+                    string inputJsonString = await sr.ReadToEndAsync();
+
+                    using (JsonDocument jsonDocument = JsonDocument.Parse(inputJsonString))
+                    {
+                        // This is an approach for determining which properties have errors and knowing the
+                        // property name as its the key value
+                        foreach (string key in ModelState.Keys)
+                        {
+                            if (ModelState[key].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
+                            {
+                                foreach (Microsoft.AspNetCore.Mvc.ModelBinding.ModelError error in ModelState[key].Errors)
+                                {
+                                    string cleansedKey = key.CleanseModelStateKey();
+                                    string camelCaseKey = cleansedKey.ToCamelCase();
+
+                                    System.Diagnostics.Trace.WriteLine($"MODEL ERROR: key:{cleansedKey} attemtedValue:{jsonDocument.RootElement.GetProperty(camelCaseKey)}, errorMessage:{error.ErrorMessage}");
+
+                                    ErrorResponse errorResponse = new ErrorResponse();
+                                    (errorResponse.errorDescription, errorResponse.errorNumber) = ErrorResponse.GetErrorMessage(error.ErrorMessage);
+                                    errorResponse.parameterName = camelCaseKey;
+                                    errorResponse.parameterValue = jsonDocument.RootElement.GetProperty(camelCaseKey).ToString();
+                                    errorResponses.Add(errorResponse);
+                                }
+                            }
+                        }
+                    }
+
+                    return BadRequest(errorResponses);
+                }
+            }
+            catch (KeyNotFoundException knfEx)
+            {
+                _logger.LogInformation(LoggingEvents.GetItem, knfEx, "CustomerController Customer(id=[{id}]) was not found.", id);
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(LoggingEvents.InternalError, ex, "CustomerControlle Customer(id=[{id}]) caused an internal error.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return NoContent();
+        }
+
+
         // GET: api/<TasksController>
         [HttpGet]
         [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
