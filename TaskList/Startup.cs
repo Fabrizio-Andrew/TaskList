@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using TaskList.Data;
 
 
 namespace TaskList
@@ -32,8 +34,8 @@ namespace TaskList
         {
             services.AddControllers();
 
-            // DEMO: Entity Framework: Register the context with dependency injection
-            //services.AddDbContext<MyDatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            // Entity Framework: Register the context with dependency injection
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // Setup swagger 
             SetupSwaggerDocuments(services);

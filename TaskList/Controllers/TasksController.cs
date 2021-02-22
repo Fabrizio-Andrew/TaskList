@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TaskList.DataTransferObjects;
+using TaskList.Models;
+using TaskList.Data;
 using TaskList.Common;
 using System;
 using System.Collections.Generic;
@@ -23,7 +25,7 @@ namespace TaskList.Controllers
         /// <summary>
         /// The database of tasks.
         /// </summary>
-        private static Dictionary<int, DataTransferObjects.Task> _tasks = new Dictionary<int, DataTransferObjects.Task>();
+        private static Dictionary<int, Models.Task> _tasks = new Dictionary<int, Models.Task>();
 
         /// <summary>
         /// Logger instance
@@ -31,7 +33,7 @@ namespace TaskList.Controllers
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CustomersController"/> class.
+        /// Initializes a new instance of the <see cref="TasksController"/> class.
         /// </summary>
         public TasksController(ILogger<TasksController> logger)
         {
@@ -39,19 +41,19 @@ namespace TaskList.Controllers
         }
 
 
-        private static DateTime firstdate = DateTime.Parse("2021-02-03");
-        static TasksController()
-        {
+        //private static DateTime firstdate = DateTime.Parse("2021-02-03");
+        //static TasksController()
+        //{
             // Initialize Data
-            _tasks.Add(1, new DataTransferObjects.Task() { id = 1, taskName = "Buy groceries", isCompleted = false, dueDate = DateTime.Parse("2021-02-03") });
-            _tasks.Add(2, new DataTransferObjects.Task() { id = 2, taskName = "Workout", isCompleted = true, dueDate = DateTime.Parse("2021-01-01") });
-            _tasks.Add(3, new DataTransferObjects.Task() { id = 3, taskName = "Paint fence", isCompleted = false, dueDate = DateTime.Parse("2021-03-15") });
-            _tasks.Add(4, new DataTransferObjects.Task() { id = 4, taskName = "Mow Lawn", isCompleted = false, dueDate = DateTime.Parse("2021-06-11") });
-        }
+        //    _tasks.Add(1, new Models.Task() { id = 1, taskName = "Buy groceries", isCompleted = false, dueDate = DateTime.Parse("2021-02-03") });
+        //    _tasks.Add(2, new Models.Task() { id = 2, taskName = "Workout", isCompleted = true, dueDate = DateTime.Parse("2021-01-01") });
+        //    _tasks.Add(3, new Models.Task() { id = 3, taskName = "Paint fence", isCompleted = false, dueDate = DateTime.Parse("2021-03-15") });
+        //    _tasks.Add(4, new Models.Task() { id = 4, taskName = "Mow Lawn", isCompleted = false, dueDate = DateTime.Parse("2021-06-11") });
+        //}
 
         // GET: api/<TasksController>
         [HttpGet]
-        [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.Task), StatusCodes.Status200OK)]
         [Route("tasks")]
         public IActionResult GetAllTasks()
         {
@@ -65,7 +67,7 @@ namespace TaskList.Controllers
         [Route("tasks")]
         public async Task<IActionResult> CreateTask([FromBody] TaskCreate payload)
         {
-            var newTask = new DataTransferObjects.Task();
+            var newTask = new Models.Task();
 
             try
             {
@@ -136,7 +138,7 @@ namespace TaskList.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _tasks[id] = new DataTransferObjects.Task()
+                    _tasks[id] = new Models.Task()
                     {
                         id = id,
                         taskName = payload.taskName,
@@ -213,7 +215,7 @@ namespace TaskList.Controllers
 
         // GET api/<TasksController>/5
         [HttpGet]
-        [ProducesResponseType(typeof(DataTransferObjects.Task), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.Task), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
         [Route("tasks/{id}")]

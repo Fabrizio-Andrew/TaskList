@@ -40,27 +40,31 @@ namespace TaskList.DataTransferObjects
             {
                 case 1:
                     {
-                        return ("String is to long", errorNumber);
+                        return ("The entity already exists.", errorNumber);
                     }
                 case 2:
                     {
-                        return ("Invalid email address", errorNumber);
+                        return ("The parameter value is too large.", errorNumber);
                     }
                 case 3:
                     {
-                        return ("Invalid range", errorNumber);
+                        return ("The parameter is required.", errorNumber);
                     }
                 case 4:
                     {
-                        return ("Must be provided", errorNumber);
+                        return ("The maximum number of entities have been created. No further entities can be created at this time.", errorNumber);
                     }
                 case 5:
                     {
-                        return ("Missing name", errorNumber);
+                        return ("The entity could not be found.", errorNumber);
                     }
                 case 6:
                     {
-                        return ("Email must contain first or last name", errorNumber);
+                        return ("The parameter value is too small.", errorNumber);
+                    }
+                case 7:
+                    {
+                        return ("The parameter value is not valid.", errorNumber);
                     }
                 default:
                     {
