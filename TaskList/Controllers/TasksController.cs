@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using TaskList.DataTransferObjects;
 using TaskList.Models;
 using TaskList.Data;
@@ -28,23 +32,37 @@ namespace TaskList.Controllers
         private static Dictionary<int, Models.Task> _tasks = new Dictionary<int, Models.Task>();
 
         /// <summary>
+        /// The database context
+        /// </summary>
+        private readonly DatabaseContext _context;
+
+        /// <summary>
         /// Logger instance
         /// </summary>
         private readonly ILogger _logger;
 
         /// <summary>
+        /// The configuration instance
+        /// </summary>
+        private readonly IConfiguration _configuration;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TasksController"/> class.
         /// </summary>
-        public TasksController(ILogger<TasksController> logger)
+        public TasksController(ILogger<TasksController> logger, DatabaseContext context, IConfiguration configuration)
         {
             _logger = logger;
+            _context = context;
+            _configuration = configuration;
+
+            // TO-DO: Implement Task limit
         }
 
 
         //private static DateTime firstdate = DateTime.Parse("2021-02-03");
         //static TasksController()
         //{
-            // Initialize Data
+        // Initialize Data
         //    _tasks.Add(1, new Models.Task() { id = 1, taskName = "Buy groceries", isCompleted = false, dueDate = DateTime.Parse("2021-02-03") });
         //    _tasks.Add(2, new Models.Task() { id = 2, taskName = "Workout", isCompleted = true, dueDate = DateTime.Parse("2021-01-01") });
         //    _tasks.Add(3, new Models.Task() { id = 3, taskName = "Paint fence", isCompleted = false, dueDate = DateTime.Parse("2021-03-15") });
@@ -57,7 +75,9 @@ namespace TaskList.Controllers
         [Route("tasks")]
         public IActionResult GetAllTasks()
         {
-            return new ObjectResult(_tasks.Keys.ToArray());
+            List<int> ids = (from c in _context.Tasks select c.id).ToList();
+
+            return new ObjectResult(ids);
         }
 
         // POST api/<TasksController>
@@ -75,7 +95,7 @@ namespace TaskList.Controllers
                 {
                     newTask.taskName = payload.taskName;
                     newTask.isCompleted = payload.isCompleted;
-                    newTask.dueDate = payload.dueDate;
+                    newTask.dueDate = payload.dueDate.ToString();
                 }
                 else
                 {
@@ -143,7 +163,7 @@ namespace TaskList.Controllers
                         id = id,
                         taskName = payload.taskName,
                         isCompleted = payload.isCompleted,
-                        dueDate = payload.dueDate,
+                        dueDate = payload.dueDate.ToString(),
                     };
                 }
                 else

@@ -23,28 +23,28 @@ namespace TaskList.Data
             Task[] tasks = new Task[]
             {
                 new Task() {
-                    id = 1,
+                    //id = 1,
                     taskName = "Buy groceries",
                     isCompleted = false,
-                    dueDate = DateTime.Parse("2021-02-03"),
+                    dueDate = "2021-02-03",
                 },
                 new Task() {
-                    id = 2,
+                    //id = 2,
                     taskName = "Workout",
                     isCompleted = true,
-                    dueDate = DateTime.Parse("2021-01-01"),
+                    dueDate = "2021-01-01",
                 },
                 new Task() {
-                    id = 3,
+                    //id = 3,
                     taskName = "Paint Fence",
                     isCompleted = false,
-                    dueDate = DateTime.Parse("2021-03-15"),
+                    dueDate = "2021-03-15",
                 },
                 new Task() {
-                    id = 4,
+                    //id = 4,
                     taskName = "Mow Lawn",
                     isCompleted = false,
-                    dueDate = DateTime.Parse("2021-06-11"),
+                    dueDate = "2021-06-11",
                 }
             };
 

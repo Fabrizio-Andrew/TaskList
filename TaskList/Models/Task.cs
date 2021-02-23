@@ -36,6 +36,6 @@ namespace TaskList.Models
         /// </summary>
         /// <value>The due date.</value>
         [Required]
-        public DateTime dueDate { get; set; }
+        public string dueDate { get; set; }
     }
 }
