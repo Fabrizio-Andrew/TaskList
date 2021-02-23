@@ -25,12 +25,6 @@ namespace TaskList.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-
-        /// <summary>
-        /// The database of tasks.
-        /// </summary>
-        //private static Dictionary<int, Models.Task> _tasks = new Dictionary<int, Models.Task>();
-
         /// <summary>
         /// The get customer by identifier route
         /// </summary>
@@ -220,7 +214,26 @@ namespace TaskList.Controllers
         [Route("tasks/{id}")]
         public IActionResult DeleteTask(int id)
         {
-            return NoContent();
+            try
+            {
+                Models.Task targetTask = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
+                if (targetTask == null)
+                {
+                    _logger.LogInformation(LoggingEvents.GetItem, $"TasksController Task(id=[{id}]) was not found.", id);
+                    return NotFound();
+                }
+                _context.Tasks.Remove(targetTask);
+
+                _context.SaveChanges();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(LoggingEvents.InternalError, ex, $"TasksController Task(id=[{id}]) caused an internal error.", id);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
         }
 
 
@@ -245,7 +258,6 @@ namespace TaskList.Controllers
 
                 return new ObjectResult(new TaskResponse(task));
             }
-
             catch (Exception ex)
             {
                 _logger.LogError(LoggingEvents.InternalError, ex, $"TasksController Task(id=[{id}]) caused an internal error.", id);
