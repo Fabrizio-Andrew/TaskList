@@ -22,7 +22,7 @@ namespace TaskList.Data
         /// <value>
         /// The tasks.
         /// </value>
-        public DbSet<Task> Tasks { get; set; }
+        public DbSet<Models.Task> Tasks { get; set; }
 
         /// <summary>
         /// Override this method to further configure the model that was discovered by convention from the entity types

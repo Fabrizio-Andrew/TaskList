@@ -26,25 +26,25 @@ namespace TaskList.Data
                     //id = 1,
                     taskName = "Buy groceries",
                     isCompleted = false,
-                    dueDate = "2021-02-03",
+                    dueDate = DateTime.Parse("2021-02-03"),
                 },
                 new Task() {
                     //id = 2,
                     taskName = "Workout",
                     isCompleted = true,
-                    dueDate = "2021-01-01",
+                    dueDate = DateTime.Parse("2021-01-01"),
                 },
                 new Task() {
                     //id = 3,
                     taskName = "Paint Fence",
                     isCompleted = false,
-                    dueDate = "2021-03-15",
+                    dueDate = DateTime.Parse("2021-03-15"),
                 },
                 new Task() {
                     //id = 4,
                     taskName = "Mow Lawn",
                     isCompleted = false,
-                    dueDate = "2021-06-11",
+                    dueDate = DateTime.Parse("2021-06-11"),
                 }
             };
 

@@ -58,17 +58,6 @@ namespace TaskList.Controllers
             // TO-DO: Implement Task limit
         }
 
-
-        //private static DateTime firstdate = DateTime.Parse("2021-02-03");
-        //static TasksController()
-        //{
-        // Initialize Data
-        //    _tasks.Add(1, new Models.Task() { id = 1, taskName = "Buy groceries", isCompleted = false, dueDate = DateTime.Parse("2021-02-03") });
-        //    _tasks.Add(2, new Models.Task() { id = 2, taskName = "Workout", isCompleted = true, dueDate = DateTime.Parse("2021-01-01") });
-        //    _tasks.Add(3, new Models.Task() { id = 3, taskName = "Paint fence", isCompleted = false, dueDate = DateTime.Parse("2021-03-15") });
-        //    _tasks.Add(4, new Models.Task() { id = 4, taskName = "Mow Lawn", isCompleted = false, dueDate = DateTime.Parse("2021-06-11") });
-        //}
-
         // GET: api/<TasksController>
         [HttpGet]
         [ProducesResponseType(typeof(Models.Task), StatusCodes.Status200OK)]
@@ -95,7 +84,7 @@ namespace TaskList.Controllers
                 {
                     newTask.taskName = payload.taskName;
                     newTask.isCompleted = payload.isCompleted;
-                    newTask.dueDate = payload.dueDate.ToString();
+                    newTask.dueDate = payload.dueDate;
                 }
                 else
                 {
@@ -163,7 +152,7 @@ namespace TaskList.Controllers
                         id = id,
                         taskName = payload.taskName,
                         isCompleted = payload.isCompleted,
-                        dueDate = payload.dueDate.ToString(),
+                        dueDate = payload.dueDate,
                     };
                 }
                 else
@@ -243,20 +232,21 @@ namespace TaskList.Controllers
         {
             try
             {
-                if (id < 1)
+                // TO-DO: Understand
+                Models.Task task = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
+
+                if (task == null)
                 {
-                    throw new Exception("Invalid ID.");
+                    _logger.LogInformation(LoggingEvents.GetItem, $"TasksController Task(id=[{id}]) was not found.", id);
+                    return NotFound();
                 }
-                return new ObjectResult(_tasks[id]);
+
+                return new ObjectResult(new TaskResponse(task));
             }
-            catch (KeyNotFoundException knfEx)
-            {
-                _logger.LogInformation(LoggingEvents.GetItem, knfEx, "CustomerController Customer(id=[{id}]) was not found.", id);
-                return NotFound();
-            }
+
             catch (Exception ex)
             {
-                _logger.LogError(LoggingEvents.InternalError, ex, "CustomerControlle Customer(id=[{id}]) caused an internal error.", id);
+                _logger.LogError(LoggingEvents.InternalError, ex, $"TasksController Task(id=[{id}]) caused an internal error.", id);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
