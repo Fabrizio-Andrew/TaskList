@@ -9,6 +9,7 @@ using TaskList.DataTransferObjects;
 using TaskList.Models;
 using TaskList.Data;
 using TaskList.Common;
+using TaskList.CustomSettings;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,15 +43,22 @@ namespace TaskList.Controllers
         private readonly IConfiguration _configuration;
 
         /// <summary>
+        /// The task limit setting
+        /// </summary>
+        private readonly TaskLimit _maxTaskEntries;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TasksController"/> class.
         /// </summary>
-        public TasksController(ILogger<TasksController> logger, DatabaseContext context, IConfiguration configuration)
+        public TasksController(ILogger<TasksController> logger, 
+                                       DatabaseContext context, 
+                                       IConfiguration configuration, 
+                                       IOptions<TaskLimit> taskLimit)
         {
             _logger = logger;
             _context = context;
             _configuration = configuration;
-
-            // TO-DO: Implement Task limit
+            _maxTaskEntries = taskLimit.Value;
         }
 
         // GET: api/<TasksController>
@@ -77,11 +85,18 @@ namespace TaskList.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // TO-DO: Add customer limit validation
-                    //if (!CanAddMoreCustomers())
-                    //{
-                    //    return StatusCode((int)HttpStatusCode.Forbidden, $"Customer limit reached MaxCustomers: [{_customerLimits.MaxCustomers}]");
-                    //}
+                    long totalTasks = (from c in _context.Tasks select c).Count();
+
+                    if (_maxTaskEntries.MaxTaskEntries <= totalTasks)
+                    {
+                        ErrorResponse errorResponse = new ErrorResponse();
+
+                        errorResponse.errorNumber = 4;
+                        errorResponse.parameterName = null;
+                        errorResponse.parameterValue = null;
+                        errorResponse.errorDescription = "The maximum number of entities have been created. No further entities can be created at this time.";
+                        return StatusCode((int)HttpStatusCode.Forbidden, errorResponse);
+                    }
 
                     newTask.taskName = payload.taskName;
                     newTask.isCompleted = payload.isCompleted;
