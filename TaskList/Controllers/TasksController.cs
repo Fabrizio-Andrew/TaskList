@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -25,11 +26,6 @@ namespace TaskList.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-        /// <summary>
-        /// The get customer by identifier route
-        /// </summary>
-        private const string GetTaskByIdRoute = "GetTaskByIdRoute";
-
         /// <summary>
         /// The database context
         /// </summary>
@@ -70,9 +66,9 @@ namespace TaskList.Controllers
 
         // POST api/<TasksController>
         [HttpPost]
-        [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(TaskResponse), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
-        [Route("tasks")]
+        [Route("api/v1/tasks")]
         public async Task<IActionResult> CreateTask([FromBody] TaskCreate payload)
         {
             var newTask = new Models.Task();
@@ -136,7 +132,7 @@ namespace TaskList.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             // DO I NEED ANYTHING ELSE IN THESE HEADERS?
-            return new ObjectResult(newTask);
+            return CreatedAtRoute("GetTaskByIdRoute", new { id = newTask.id }, new TaskResponse(newTask));
         }
 
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -211,7 +207,7 @@ namespace TaskList.Controllers
         [HttpDelete]
         [ProducesResponseType(typeof(int), StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
-        [Route("tasks/{id}")]
+        [Route("tasks/{id}", Name = "GetTaskByIdRoute")]
         public IActionResult DeleteTask(int id)
         {
             try
