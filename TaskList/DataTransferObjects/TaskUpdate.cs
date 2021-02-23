@@ -10,13 +10,6 @@ namespace TaskList.DataTransferObjects
     public class TaskUpdate
     {
         /// <summary>
-        /// Gets or sets the task identifier.
-        /// </summary>
-        /// <value>The identifier.</value>
-        [Required(ErrorMessage = "3")]
-        public int id { get; set; }
-
-        /// <summary>
         /// Gets or sets the task name.
         /// </summary>
         /// <value>The task name.</value>

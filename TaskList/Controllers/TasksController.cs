@@ -29,7 +29,12 @@ namespace TaskList.Controllers
         /// <summary>
         /// The database of tasks.
         /// </summary>
-        private static Dictionary<int, Models.Task> _tasks = new Dictionary<int, Models.Task>();
+        //private static Dictionary<int, Models.Task> _tasks = new Dictionary<int, Models.Task>();
+
+        /// <summary>
+        /// The get customer by identifier route
+        /// </summary>
+        private const string GetTaskByIdRoute = "GetTaskByIdRoute";
 
         /// <summary>
         /// The database context
@@ -71,7 +76,7 @@ namespace TaskList.Controllers
 
         // POST api/<TasksController>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(TaskResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
         [Route("tasks")]
         public async Task<IActionResult> CreateTask([FromBody] TaskCreate payload)
@@ -82,9 +87,19 @@ namespace TaskList.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    // TO-DO: Add customer limit validation
+                    //if (!CanAddMoreCustomers())
+                    //{
+                    //    return StatusCode((int)HttpStatusCode.Forbidden, $"Customer limit reached MaxCustomers: [{_customerLimits.MaxCustomers}]");
+                    //}
+
                     newTask.taskName = payload.taskName;
                     newTask.isCompleted = payload.isCompleted;
                     newTask.dueDate = payload.dueDate;
+
+                    _context.Tasks.Add(newTask);
+
+                    _context.SaveChanges();
                 }
                 else
                 {
@@ -118,21 +133,15 @@ namespace TaskList.Controllers
                             }
                         }
                     }
-
                     return BadRequest(errorResponses);
                 }
             }
-            //catch (KeyNotFoundException knfEx)
-            //{
-            //    _logger.LogInformation(LoggingEvents.GetItem, knfEx, "TasksController Customer(id=[{id}]) was not found.", id);
-            //    return NotFound();
-            //}
             catch (Exception ex)
             {
                 _logger.LogError(LoggingEvents.InternalError, ex, "TasksController Customer(id=[{id}]) caused an internal error.");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
+            // DO I NEED ANYTHING ELSE IN THESE HEADERS?
             return new ObjectResult(newTask);
         }
 
@@ -147,33 +156,26 @@ namespace TaskList.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    _tasks[id] = new Models.Task()
-                    {
-                        id = id,
-                        taskName = payload.taskName,
-                        isCompleted = payload.isCompleted,
-                        dueDate = payload.dueDate,
-                    };
+                    Models.Task targetTask = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
+
+                    targetTask.taskName = payload.taskName;
+                    targetTask.isCompleted = payload.isCompleted;
+                    targetTask.dueDate = payload.dueDate;
+
+                    _context.SaveChanges();
                 }
                 else
                 {
                     List<ErrorResponse> errorResponses = new List<ErrorResponse>();
 
-
-                    // DEMO: Enable multi-stream read
-                    // The EnableMultipleStreamReadMiddleware is needed for reading from the
-                    // Request Body a second time, the first time the Request.Body is read
-                    // is in the middleware for deserializing the Customer Input
-
-                    // This allows us access to the raw input
+                    // Access to the raw input
                     using StreamReader sr = new StreamReader(Request.Body);
                     Request.Body.Seek(0, SeekOrigin.Begin);
                     string inputJsonString = await sr.ReadToEndAsync();
 
                     using (JsonDocument jsonDocument = JsonDocument.Parse(inputJsonString))
                     {
-                        // This is an approach for determining which properties have errors and knowing the
-                        // property name as its the key value
+                        // Determine which objects have errors knowing the object name as its the key value
                         foreach (string key in ModelState.Keys)
                         {
                             if (ModelState[key].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
@@ -200,12 +202,12 @@ namespace TaskList.Controllers
             }
             catch (KeyNotFoundException knfEx)
             {
-                _logger.LogInformation(LoggingEvents.GetItem, knfEx, "CustomerController Customer(id=[{id}]) was not found.", id);
+                _logger.LogInformation(LoggingEvents.GetItem, knfEx, $"CustomerController Customer(id=[{id}]) was not found.", id);
                 return NotFound();
             }
             catch (Exception ex)
             {
-                _logger.LogError(LoggingEvents.InternalError, ex, "CustomerControlle Customer(id=[{id}]) caused an internal error.", id);
+                _logger.LogError(LoggingEvents.InternalError, ex, $"CustomerControlle Customer(id=[{id}]) caused an internal error.", id);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
