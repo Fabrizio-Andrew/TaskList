@@ -16,6 +16,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TaskList.Data;
+using TaskList.Middleware;
 
 
 namespace TaskList
@@ -34,17 +35,23 @@ namespace TaskList
         {
             services.AddControllers();
 
+            //Enable to allow manual handling of model binding errors
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
             // Entity Framework: Register the context with dependency injection
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // Setup swagger 
             SetupSwaggerDocuments(services);
 
+            // Enable multi-stream read
+            services.AddTransient<EnableMultipleStreamReadMiddleware>();
+
             // DEMO: Setup custom settings
             //SetupCustomSettings(services);
-
-            // Setup the application insights integration
-            //SetupApplicationInsights(services);
         }
 
         /// <summary>
@@ -86,6 +93,8 @@ namespace TaskList
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseMultipleStreamReadMiddleware();
 
             app.UseHttpsRedirection();
 

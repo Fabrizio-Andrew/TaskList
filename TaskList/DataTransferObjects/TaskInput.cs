@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
 using TaskList.Data;
 
 namespace TaskList.DataTransferObjects
@@ -15,6 +12,7 @@ namespace TaskList.DataTransferObjects
         /// </summary>
         /// <value>The task name.</value>
         [Required(ErrorMessage = "3")]
+        [StringLength(100, ErrorMessage = "2")]
         public string taskName { get; set; }
 
         /// <summary>
@@ -50,7 +48,6 @@ namespace TaskList.DataTransferObjects
                 }
             }
             return true;
-
         }
     }
 }

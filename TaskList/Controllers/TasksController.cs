@@ -147,7 +147,7 @@ namespace TaskList.Controllers
                                     ErrorResponse errorResponse = new ErrorResponse();
                                     (errorResponse.errorDescription, errorResponse.errorNumber) = ErrorResponse.GetErrorMessage(error.ErrorMessage);
                                     errorResponse.parameterName = camelCaseKey;
-                                    errorResponse.parameterValue = jsonDocument.RootElement.GetProperty(camelCaseKey).ToString();
+                                    errorResponse.parameterValue = jsonDocument.RootElement.GetProperty(camelCaseKey).ToString(); 
                                     errorResponses.Add(errorResponse);
                                 }
                             }
@@ -191,6 +191,21 @@ namespace TaskList.Controllers
 
                     Models.Task targetTask = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
 
+                    // Catch task not found error (404).
+                    if (targetTask == null)
+                    {
+                        _logger.LogInformation(LoggingEvents.GetItem, $"TasksController Task(id=[{id}]) was not found.", id);
+
+                        ErrorResponse errorResponse = new ErrorResponse();
+
+                        errorResponse.errorNumber = 5;
+                        errorResponse.parameterName = "id";
+                        errorResponse.parameterValue = id.ToString();
+                        errorResponse.errorDescription = "The entity could not be found.";
+
+                        return StatusCode((int)HttpStatusCode.NotFound, errorResponse);
+                    }
+
                     targetTask.taskName = payload.taskName;
                     targetTask.isCompleted = payload.isCompleted;
                     targetTask.dueDate = payload.dueDate;
@@ -226,8 +241,7 @@ namespace TaskList.Controllers
                                     errorResponse.parameterValue = jsonDocument.RootElement.GetProperty(camelCaseKey).ToString();
                                     errorResponses.Add(errorResponse);
                                 }
-                            }
-                        }
+                            }                        }
                     }
 
                     return BadRequest(errorResponses);
@@ -256,10 +270,20 @@ namespace TaskList.Controllers
             try
             {
                 Models.Task targetTask = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
+
+                // Catch task not found error (404).
                 if (targetTask == null)
                 {
                     _logger.LogInformation(LoggingEvents.GetItem, $"TasksController Task(id=[{id}]) was not found.", id);
-                    return NotFound();
+
+                    ErrorResponse errorResponse = new ErrorResponse();
+
+                    errorResponse.errorNumber = 5;
+                    errorResponse.parameterName = "id";
+                    errorResponse.parameterValue = id.ToString();
+                    errorResponse.errorDescription = "The entity could not be found.";
+
+                    return StatusCode((int)HttpStatusCode.NotFound, errorResponse);
                 }
                 _context.Tasks.Remove(targetTask);
 
@@ -289,10 +313,19 @@ namespace TaskList.Controllers
                 // TO-DO: Understand
                 Models.Task task = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
 
+                // Catch task not found error (404).
                 if (task == null)
                 {
                     _logger.LogInformation(LoggingEvents.GetItem, $"TasksController Task(id=[{id}]) was not found.", id);
-                    return NotFound();
+
+                    ErrorResponse errorResponse = new ErrorResponse();
+
+                    errorResponse.errorNumber = 5;
+                    errorResponse.parameterName = "id";
+                    errorResponse.parameterValue = id.ToString();
+                    errorResponse.errorDescription = "The entity could not be found.";
+
+                    return StatusCode((int)HttpStatusCode.NotFound, errorResponse);
                 }
 
                 return new ObjectResult(new TaskResponse(task));
