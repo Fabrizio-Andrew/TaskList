@@ -6,6 +6,7 @@
     <!-- Disable warning: Missing XML comment for publicly visible type or
         member 'Type_or_Member'-->
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <UserSecretsId>689c5cce-1add-4059-81ff-353eadc395b3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

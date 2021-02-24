@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TaskList.Data;
 using TaskList.Middleware;
+using TaskList.CustomSettings;
 
 
 namespace TaskList
@@ -130,6 +131,23 @@ namespace TaskList
                 // Serve the Swagger UI at the app's root (http://localhost:<port>)
                 c.RoutePrefix = string.Empty;
             });
+        }
+
+        /// <summary>
+        /// Sets up custom, strongly typed settings
+        /// </summary>
+        /// <param name="services">The service colleciton</param>
+        private void SetupCustomSettings(IServiceCollection services)
+        {
+            // Add support for injection of IOptions<T>
+            services.AddOptions();
+
+            // Add the class that represnets the settings for the CustomerLimits section 
+            // in the JSON settings
+            services.Configure<TaskLimit>(Configuration.GetSection(nameof(TaskLimit)));
+
+            // Support Generic IConfiguration access for generic string access
+            services.AddSingleton<IConfiguration>(Configuration);
         }
     }
 }
