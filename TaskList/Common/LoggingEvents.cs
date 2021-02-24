@@ -21,7 +21,6 @@
         /// The delete item
         /// </summary>
         public const int DeleteItem = 1003;
-
         /// <summary>
         /// The get item not found
         /// </summary>

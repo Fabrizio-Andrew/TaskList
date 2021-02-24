@@ -12,7 +12,6 @@ namespace TaskList.Data
         /// <remarks>Step 6a</remarks>
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
-            // Create database and tables
             Database.EnsureCreated();
         }
 

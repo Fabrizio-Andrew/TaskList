@@ -2,7 +2,7 @@
 
 namespace TaskList.Middleware
 {
-    // DEMO: Enable multi-stream read
+    // Enable multi-stream read
 
     /// <summary>
     /// Middleware extensions 

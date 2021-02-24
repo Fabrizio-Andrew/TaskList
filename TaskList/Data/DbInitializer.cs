@@ -15,33 +15,28 @@ namespace TaskList.Data
             // Check to see if there is any data in the customer table
             if (context.Tasks.Any())
             {
-                // Customer table has data, nothing to do here
                 return;
             }
 
-            // Seed data to database
+            // If no data present, seed data to database
             Task[] tasks = new Task[]
             {
                 new Task() {
-                    //id = 1,
                     taskName = "Buy groceries",
                     isCompleted = false,
                     dueDate = DateTime.Parse("2021-02-03"),
                 },
                 new Task() {
-                    //id = 2,
                     taskName = "Workout",
                     isCompleted = true,
                     dueDate = DateTime.Parse("2021-01-01"),
                 },
                 new Task() {
-                    //id = 3,
                     taskName = "Paint Fence",
                     isCompleted = false,
                     dueDate = DateTime.Parse("2021-03-15"),
                 },
                 new Task() {
-                    //id = 4,
                     taskName = "Mow Lawn",
                     isCompleted = false,
                     dueDate = DateTime.Parse("2021-06-11"),

@@ -1,24 +1,18 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using TaskList.Data;
 using TaskList.Middleware;
 using TaskList.CustomSettings;
-
 
 namespace TaskList
 {
@@ -51,8 +45,8 @@ namespace TaskList
             // Enable multi-stream read
             services.AddTransient<EnableMultipleStreamReadMiddleware>();
 
-            // DEMO: Setup custom settings
-            //SetupCustomSettings(services);
+            // Setup custom settings
+            SetupCustomSettings(services);
         }
 
         /// <summary>

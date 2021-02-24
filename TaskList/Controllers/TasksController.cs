@@ -18,8 +18,6 @@ using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace TaskList.Controllers
 {
     //[Route("api/[controller]")]
@@ -61,21 +59,16 @@ namespace TaskList.Controllers
             _maxTaskEntries = taskLimit.Value;
         }
 
-        // GET: api/<TasksController>
-        [HttpGet]
-        [ProducesResponseType(typeof(Models.Task), StatusCodes.Status200OK)]
-        [Route("tasks")]
-        public IActionResult GetAllTasks()
-        {
-            List<int> ids = (from c in _context.Tasks select c.id).ToList();
-
-            return new ObjectResult(ids);
-        }
-
-        // POST api/<TasksController>
+        /// <summary>
+        /// Creates a new task based on client input.
+        /// </summary>
+        /// <param name="payload"></param>
+        /// <returns>Success message (201)with resource location header.</returns>
         [HttpPost]
         [ProducesResponseType(typeof(TaskResponse), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(List<ErrorResponse>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.Conflict)]
         [Route("api/v1/tasks")]
         public async Task<IActionResult> CreateTask([FromBody] TaskInput payload)
         {
@@ -123,6 +116,7 @@ namespace TaskList.Controllers
                 }
                 else
                 {
+                    // If model is invalid, create a list of all invalid parameters
                     List<ErrorResponse> errorResponses = new List<ErrorResponse>();
 
                     using StreamReader sr = new StreamReader(Request.Body);
@@ -131,8 +125,7 @@ namespace TaskList.Controllers
 
                     using (JsonDocument jsonDocument = JsonDocument.Parse(inputJsonString))
                     {
-                        // This is an approach for determining which properties have errors and knowing the
-                        // property name as its the key value
+                        // Determine which properties have errors and the property name (key value)
                         foreach (string key in ModelState.Keys)
                         {
                             if (ModelState[key].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
@@ -161,19 +154,25 @@ namespace TaskList.Controllers
                 _logger.LogError(LoggingEvents.InternalError, ex, "TasksController Customer(id=[{id}]) caused an internal error.");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            // DO I NEED ANYTHING ELSE IN THESE HEADERS?
             return CreatedAtRoute("GetTaskByIdRoute", new { id = newTask.id }, new TaskResponse(newTask));
         }
 
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
+        /// <summary>
+        /// Updates an existing Task object based on user input.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="payload"></param>
+        /// <returns>No content.</returns>
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(List<ErrorResponse>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.Conflict)]
         [Route("tasks/{id}")]
         [HttpPatch]
         public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskInput payload)
         {
             try
             {
-
                 if (ModelState.IsValid)
                 {
                     // Validate that the taskName is unique (excluding the existing entry for this Task object).
@@ -214,6 +213,7 @@ namespace TaskList.Controllers
                 }
                 else
                 {
+                    // If model is invalid, create a list of all invalid parameters
                     List<ErrorResponse> errorResponses = new List<ErrorResponse>();
 
                     // Access to the raw input
@@ -223,7 +223,7 @@ namespace TaskList.Controllers
 
                     using (JsonDocument jsonDocument = JsonDocument.Parse(inputJsonString))
                     {
-                        // Determine which objects have errors knowing the object name as its the key value
+                        // Determine which objects have errors knowing the object name (key value)
                         foreach (string key in ModelState.Keys)
                         {
                             if (ModelState[key].ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid)
@@ -241,29 +241,28 @@ namespace TaskList.Controllers
                                     errorResponse.parameterValue = jsonDocument.RootElement.GetProperty(camelCaseKey).ToString();
                                     errorResponses.Add(errorResponse);
                                 }
-                            }                        }
+                            }                        
+                        }
                     }
-
                     return BadRequest(errorResponses);
                 }
-            }
-            catch (KeyNotFoundException knfEx)
-            {
-                _logger.LogInformation(LoggingEvents.GetItem, knfEx, $"CustomerController Customer(id=[{id}]) was not found.", id);
-                return NotFound();
             }
             catch (Exception ex)
             {
                 _logger.LogError(LoggingEvents.InternalError, ex, $"CustomerControlle Customer(id=[{id}]) caused an internal error.", id);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a specified Task object from the DB.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>No Content.</returns>
         [HttpDelete]
-        [ProducesResponseType(typeof(int), StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(int), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.NotFound)]
         [Route("tasks/{id}", Name = "GetTaskByIdRoute")]
         public IActionResult DeleteTask(int id)
         {
@@ -296,21 +295,22 @@ namespace TaskList.Controllers
                 _logger.LogError(LoggingEvents.InternalError, ex, $"TasksController Task(id=[{id}]) caused an internal error.", id);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
         }
 
 
-        // GET api/<TasksController>/5
+        /// <summary>
+        /// Gets a specified Task object from the DB.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>The specified task.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(Models.Task), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(void), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(Models.Task), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [Route("tasks/{id}")]
         public IActionResult GetTaskById(int id)
         {
             try
             {
-                // TO-DO: Understand
                 Models.Task task = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
 
                 // Catch task not found error (404).
@@ -327,7 +327,6 @@ namespace TaskList.Controllers
 
                     return StatusCode((int)HttpStatusCode.NotFound, errorResponse);
                 }
-
                 return new ObjectResult(new TaskResponse(task));
             }
             catch (Exception ex)
@@ -335,6 +334,22 @@ namespace TaskList.Controllers
                 _logger.LogError(LoggingEvents.InternalError, ex, $"TasksController Task(id=[{id}]) caused an internal error.", id);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+        }
+
+        /// <summary>
+        /// Gets all task objects in the DB.
+        /// </summary>
+        /// <returns>A list of all tasks.</returns>
+        [HttpGet]
+        [ProducesResponseType(typeof(Models.Task), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Models.Task), StatusCodes.Status400BadRequest)]
+
+        [Route("tasks")]
+        public IActionResult GetAllTasks()
+        {
+            List<int> ids = (from c in _context.Tasks select c.id).ToList();
+
+            return new ObjectResult(ids);
         }
     }
 }
