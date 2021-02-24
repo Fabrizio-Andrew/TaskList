@@ -1,0 +1,10 @@
+CSCI E-94 Assignment #2: Task List
+
+Andrew Fabrizio
+andrewdfabrizio@gmail.com
+
+REST Interface Azure Endpoint: https://csci-e94-tasklist.azurewebsites.net
+
+Notes:
+
+403 (forbidden) and 409 (conflict) errors are managed separately from other model validation (400 Bad Request) Errors in TasksController.cs.  This was necessary to provide the distinct error codes within the specified format.
