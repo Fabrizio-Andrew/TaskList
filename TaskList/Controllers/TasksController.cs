@@ -77,7 +77,7 @@ namespace TaskList.Controllers
         [ProducesResponseType(typeof(TaskResponse), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
         [Route("api/v1/tasks")]
-        public async Task<IActionResult> CreateTask([FromBody] TaskCreate payload)
+        public async Task<IActionResult> CreateTask([FromBody] TaskInput payload)
         {
             var newTask = new Models.Task();
 
@@ -85,6 +85,7 @@ namespace TaskList.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    // Validate that the database task limit has not been reached.
                     long totalTasks = (from c in _context.Tasks select c).Count();
 
                     if (_maxTaskEntries.MaxTaskEntries <= totalTasks)
@@ -95,7 +96,21 @@ namespace TaskList.Controllers
                         errorResponse.parameterName = null;
                         errorResponse.parameterValue = null;
                         errorResponse.errorDescription = "The maximum number of entities have been created. No further entities can be created at this time.";
+
                         return StatusCode((int)HttpStatusCode.Forbidden, errorResponse);
+                    }
+
+                    // Validate that the taskName is unique
+                    if (!TaskInput.CheckUniqueTaskName(payload, _context))
+                    {
+                        ErrorResponse errorResponse = new ErrorResponse();
+
+                        errorResponse.errorNumber = 1;
+                        errorResponse.parameterName = "taskName";
+                        errorResponse.parameterValue = payload.taskName;
+                        errorResponse.errorDescription = "The entity already exists.";
+
+                        return StatusCode((int)HttpStatusCode.Conflict, errorResponse);
                     }
 
                     newTask.taskName = payload.taskName;
@@ -154,13 +169,26 @@ namespace TaskList.Controllers
         [ProducesResponseType(typeof(List<ErrorResponse>), StatusCodes.Status400BadRequest)]
         [Route("tasks/{id}")]
         [HttpPatch]
-        public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskUpdate payload)
+        public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskInput payload)
         {
             try
             {
 
                 if (ModelState.IsValid)
                 {
+                    // Validate that the taskName is unique (excluding the existing entry for this Task object).
+                    if (!TaskInput.CheckUniqueTaskName(payload, _context, id))
+                    {
+                        ErrorResponse errorResponse = new ErrorResponse();
+
+                        errorResponse.errorNumber = 1;
+                        errorResponse.parameterName = "taskName";
+                        errorResponse.parameterValue = payload.taskName;
+                        errorResponse.errorDescription = "The entity already exists.";
+
+                        return StatusCode((int)HttpStatusCode.Conflict, errorResponse);
+                    }
+
                     Models.Task targetTask = (from c in _context.Tasks where c.id == id select c).SingleOrDefault();
 
                     targetTask.taskName = payload.taskName;
