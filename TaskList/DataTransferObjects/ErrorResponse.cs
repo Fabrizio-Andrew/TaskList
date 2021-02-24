@@ -1,5 +1,8 @@
 ﻿namespace TaskList.DataTransferObjects
 {
+    /// <summary>
+    /// Defines the standard error format to be returned to the client.
+    /// </summary>
     public class ErrorResponse
     {
         public int errorNumber { get; set; }

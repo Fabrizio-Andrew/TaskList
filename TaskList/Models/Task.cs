@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace TaskList.Models
 {
+    /// <summary>
+    /// Defines the task entity that coincides with the Task SQL table.
+    /// </summary>
     public class Task
     {       
         /// <summary>

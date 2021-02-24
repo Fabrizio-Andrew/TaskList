@@ -3,6 +3,9 @@ using TaskList.Models;
 
 namespace TaskList.DataTransferObjects
 {
+    /// <summary>
+    /// Defines the standard format for task object outputs back to the client.
+    /// </summary>
     public class TaskResponse
     {
         /// <summary>

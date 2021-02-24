@@ -5,6 +5,9 @@ using TaskList.Data;
 
 namespace TaskList.DataTransferObjects
 {
+    /// <summary>
+    /// Defines the format for client inputs via POST or PATCH.
+    /// </summary>
     public class TaskInput
     {
         /// <summary>
